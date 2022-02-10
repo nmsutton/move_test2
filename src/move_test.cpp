@@ -27,10 +27,11 @@ void ext_input(char direction, double *gc_firing, G* g) {
 		Apply external input
 	*/	
 	double new_firing, new_weight, weight_sum, pd_fac, mex_hat, new_sig, pdx, pdy, gcx, gcy, d;
-	int pd_i, gc_i; double pd_facs[g->layer_size]; double new_firing_group[g->layer_size];
-	double firing_inhib[g->layer_size];
-	for (int i = 0; i < g->layer_size; i++) {pd_facs[i] = 0.00001; new_firing_group[i] = 0.00001;
-	firing_inhib[i] = 0.00001;}	
+	int pd_i, gc_i; double pd_facs[g->layer_size]; double new_inhib_firing[g->layer_size];
+	double inhib_firing[g->layer_size]; double excit_firing = g->ext_input_base; 
+	double inhib_weights[g->layer_size];
+	for (int i = 0; i < g->layer_size; i++) {pd_facs[i] = 0.00001; new_inhib_firing[i] = 0.00001;
+	inhib_firing[i] = 0.00001;}	
 
 	set_pos(g, direction); if (g->print_move) {cout << "\n";}
 
@@ -43,6 +44,7 @@ void ext_input(char direction, double *gc_firing, G* g) {
 
 	//if (g->pc_to_gc) {place_cell_firing(gc_firing, g);}
 	//if (g->bc_to_gc) {boundary_cell_firing(gc_firing, g);}
+
 	/* grid cell and interneuron synapse connections */
 	for (int pdy = 0; pdy < g->layer_y; pdy++) {
 		for (int pdx = 0; pdx < g->layer_x; pdx++) {
@@ -55,45 +57,44 @@ void ext_input(char direction, double *gc_firing, G* g) {
 						if (d < g->dist_thresh) { 
 							mex_hat = get_mex_hat(d, g);
 							gc_firing[pd_i] = floor(gc_firing[pd_i]); // carlsim model only reports whole number gc firing
-							//new_firing = (gc_firing[pd_i] * mex_hat) - ((1/pow(g->dist_thresh,1.75))*8);
-							//new_firing = gc_firing[pd_i] * (mex_hat - 0.3889);
-							//new_firing = gc_firing[pd_i] * mex_hat;
-							//new_firing = (gc_firing[pd_i] * mex_hat) - (0.47851);
-							//new_firing = (gc_firing[pd_i] * mex_hat) - (0.4);
 							new_firing = gc_firing[pd_i] * mex_hat;
-							new_firing_group[gc_i] = new_firing_group[gc_i] + new_firing;
+							new_inhib_firing[gc_i] = new_inhib_firing[gc_i] + new_firing;
 						}
 					}
 				}
 			}
 		}
 	}
+	// convert inhib signaling to all negative
 	for (int i = 0; i < g->layer_size; i++) {
 		double highest_firing = 5.0;
-		if (new_firing_group[i] > 0 && new_firing_group[i] <= highest_firing) {
-			firing_inhib[i] = -new_firing_group[i];
+		if (new_inhib_firing[i] > 0 && new_inhib_firing[i] <= highest_firing) {
+			inhib_firing[i] = -new_inhib_firing[i];
 		}
-		else if (new_firing_group[i] <= 0) {
-			firing_inhib[i] = -highest_firing + new_firing_group[i];
+		else if (new_inhib_firing[i] <= 0) {
+			inhib_firing[i] = -highest_firing + new_inhib_firing[i];
 		}
-		if (firing_inhib[i] > 0) {
-			firing_inhib[i] = 0;
+		if (inhib_firing[i] > 0) {
+			inhib_firing[i] = 0; // only negative values
 		}
 	}
-	//print_firing(firing_inhib, g->t, g);
-	//print_firing(new_firing_group, g->t, g);
+	// find weights
+	for (int i = 0; i < g->layer_size; i++) {
+		if (gc_firing[i] != 0) { // avoid division by 0
+			inhib_weights[i] = (gc_firing[i] - abs(inhib_firing[i])) / gc_firing[i];
+		}
+		else {
+			inhib_weights[i] = 0;
+		}
+	}
+	//print_firing(inhib_firing, g->t, g);
+	//print_firing(new_inhib_firing, g->t, g);
 
 	for (int i = 0; i < g->layer_size; i++) {
 		if (g->gc_to_gc) {
-			/*if (new_firing_group[i] > 0) {
-				new_firing_group[i] = 0; // only negative values for IN weights
-			}
-			gc_firing[i] = new_firing_group[i] + (g->dist_thresh*1.7);*/
-			//gc_firing[i] = (gc_firing[i] + firing_inhib[i]) + (g->dist_thresh*1.7);
-			gc_firing[i] = firing_inhib[i] + (g->dist_thresh*1.3);
-			//gc_firing[i] = new_firing_group[i];
+			gc_firing[i] = inhib_firing[i] + excit_firing;
+			//gc_firing[i] = excit_firing - (gc_firing[i] * inhib_weights[i]);
 		}
-
 		// original tau derivative
 		gc_firing[i] = g->asig_a * exp(-1*(gc_firing[i]/g->asig_b))+g->asig_c;
 		// non zero firing rectifier

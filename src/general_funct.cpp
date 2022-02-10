@@ -37,9 +37,11 @@ struct G {
 	double noise_scale = 0.01; // scale to desired size for firing
 
 	// values for synapse activites
+	double dist_thresh = 5; // distance threshold for only local connections
 	bool speed_adjustable = 0;
 	double speed = 1.0; // starting grid cell input speed level
 	double base_ext = 1.0;//2.5; // baseline ext input speed level
+	double ext_input_base = dist_thresh*1.3; // baseline excitatory input
 	double min_speed = 0.25; // minimum speed for random speed generator. note: signal applied even when stopped.
 	double max_speed = 1.0; // maximum speed for random speed generator
 	double tau_syn = .6;
@@ -55,7 +57,6 @@ struct G {
 	double s_4_syn = 1.5; 
 	double s_5_syn = 1.0;
 	double a_syn = 4.4; // add f2 f3
-	double dist_thresh = 5; // distance threshold for only local connections
 
 	// initial values
 	double y_inter_init = 0.4;//y_inter_syn; // y intercept
