@@ -1,0 +1,1 @@
+g++ ./array_size.cpp -o array_size && ./array_size
