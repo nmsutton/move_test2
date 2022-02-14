@@ -150,9 +150,9 @@ void write_firing(double *gc_firing, int t, G* g) {
 }*/
 
 void print_firing(double *gc_firing, int t, G* g) {
-	int layer_x = g->layer_x;
-	int layer_y = g->layer_y;
-	int layer_size = g->layer_size;
+	int layer_x = 24;//g->layer_x;
+	int layer_y = 24;//g->layer_y;
+	int layer_size = layer_x*layer_y;//g->layer_size;
 	int gc_ind = 0; // grid cell index
 	double temp;
 
@@ -225,6 +225,14 @@ double get_noise(G *g) {
 	return rand_val;
 }
 
+void init_firing2(double *gc_firing, G *g) {
+	int rand_max = 100;
+	double scale = .05;
+
+	for (int i = 0; i < g->layer_size; i++) {
+		gc_firing[i] = (rand() % rand_max) * scale;
+	}
+}
 
 void init_firing(double *gc_firing, G *g) {
 	// initialize firing

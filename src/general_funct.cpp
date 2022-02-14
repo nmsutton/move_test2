@@ -15,16 +15,16 @@ struct G {
 	int num_bumps = bumps_x * bumps_y; // number of initial bumps
 	double pos[2] = {1,1}; // starting position
 	char last_dir; // last direction command
-	static const int layer_x = 20;//26;
-	static const int layer_y = 20;//26;
+	static const int layer_x = 30;//26;
+	static const int layer_y = 30;//26;
 	static const int layer_size = layer_x * layer_y;
 	int start_t = -1; // beginning time of move command
 	int mi = 0; // move list index
 	double run_time = 500;//50; // sim run time
 	bool print_move = 0; // print each move's direction
 	bool print_time = 1; // print time after processing
-	bool init_bumps = 1; // inital bumps present
-	bool base_input = 1; // baseline external signal input
+	bool init_bumps = 0; // inital bumps present
+	bool base_input = 0; // baseline external signal input
 	bool gc_to_gc = 1; // grid cell to grid cell signaling
 	bool bc_to_gc = 0; // boundary cells to grid cells signaling
 	bool pc_to_gc = 0; // place cells to grid cells signaling
@@ -44,7 +44,7 @@ struct G {
 	double ext_input_base = dist_thresh*1.3; // baseline excitatory input
 	double min_speed = 0.25; // minimum speed for random speed generator. note: signal applied even when stopped.
 	double max_speed = 1.0; // maximum speed for random speed generator
-	double tau_syn = .6;
+	double tau_syn = 10;
 	double y_inter_syn = 0.2;//-1;//-0.03;//-0.05;//0.15;//-.5;//1.044;//1.055; // y intercept
 	double scale_syn = 2.5;//0.25;//1.0; // multiple synaptic connections scaling factor
 	double m_syn = 0.3; // magnitude variable for mex hat f1
@@ -57,6 +57,9 @@ struct G {
 	double s_4_syn = 1.5; 
 	double s_5_syn = 1.0;
 	double a_syn = 4.4; // add f2 f3
+	double syn_scale = 5.0; // max spiking scale
+  	double w_scale = 0.1;//0.5/syn_scale;
+  	double f_scale = 15.0;//syn_scale*3;
 
 	// initial values
 	double y_inter_init = 0.4;//y_inter_syn; // y intercept
