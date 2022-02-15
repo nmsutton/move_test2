@@ -20,7 +20,7 @@ struct G {
 	static const int layer_size = layer_x * layer_y;
 	int start_t = -1; // beginning time of move command
 	int mi = 0; // move list index
-	double run_time = 500;//50; // sim run time
+	double run_time = 1000;//50; // sim run time
 	bool print_move = 0; // print each move's direction
 	bool print_time = 1; // print time after processing
 	bool init_bumps = 0; // inital bumps present

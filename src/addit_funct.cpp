@@ -150,8 +150,8 @@ void write_firing(double *gc_firing, int t, G* g) {
 }*/
 
 void print_firing(double *gc_firing, int t, G* g) {
-	int layer_x = 24;//g->layer_x;
-	int layer_y = 24;//g->layer_y;
+	int layer_x = 19;//g->layer_x;
+	int layer_y = 19;//g->layer_y;
 	int layer_size = layer_x*layer_y;//g->layer_size;
 	int gc_ind = 0; // grid cell index
 	double temp;
@@ -162,10 +162,11 @@ void print_firing(double *gc_firing, int t, G* g) {
 		for (int i = (layer_y - 1); i >= 0; i--) {
 			for (int j = 0; j < layer_x; j++) {
 				gc_ind = (i * layer_x) + j;
-				printf("|");
+				//printf("|");
+				printf("\t");
 				if (gc_firing[gc_ind] >= 0) {
 					//printf("+");
-					printf(" ");
+					//printf(" ");
 				}
 				//printf("%.2f %c",abs(gc_firing[gc_ind]),get_pd(i,j));
 				printf("%.2f",gc_firing[gc_ind]);

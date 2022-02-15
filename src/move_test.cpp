@@ -51,51 +51,30 @@ void ext_input(char direction, double *gc_firing, G* g) {
 	//if (g->pc_to_gc) {place_cell_firing(gc_firing, g);}
 	//if (g->bc_to_gc) {boundary_cell_firing(gc_firing, g);}
 
-	/* grid cell and interneuron synapse connections */
-	for (int y_in = 0; y_in < g->layer_y; y_in++) {
-		for (int x_in = 0; x_in < g->layer_x; x_in++) {
-			//if (direction == get_pd(x_in, y_in) || direction == 'n') {
-				for (int y_gc = 0; y_gc < g->layer_y; y_gc++) {
-					for (int x_gc = 0; x_gc < g->layer_x; x_gc++) {			
-						i_in = (y_in * g->layer_x) + x_in;						
-						i_gc = (y_gc * g->layer_x) + x_gc;
-						//if (d < g->dist_thresh) { 
-						//if (d < g->dist_thresh && i_in == 31) { 
-							//mex_hat = saved_weights[i_in][i_gc];
-							mex_hat = saved_weights[i_gc][i_in];
-							//gc_firing[i_in] = floor(gc_firing[i_in]); // carlsim model only reports whole number gc firing
-							new_firing = ((mex_hat * g->w_scale) * gc_firing[i_in]);
-							//new_firing = mex_hat * g->w_scale;
-							new_firing_group[i_gc] = new_firing_group[i_gc] + new_firing;
-							//printf("((%f * %f) * %f) tot:%f\n",mex_hat,g->w_scale,gc_firing[i_in],new_firing_group[i_gc]);
-							//printf("%f\n",saved_weights[0][0]);
-						if (i_gc == 31) {
-							//printf("%d|",i_gc);
-							//printf("%f|",new_firing);
-						}
-						//}
-					}
-				}
-				//printf("%f|",new_firing_group[i_in]);
-			//}
+	for (int i = 0; i < g->layer_size; i++) {
+		for (int j = 0; j < g->layer_size; j++) {
+			//mex_hat = saved_weights[i_in][i_gc];
+			mex_hat = saved_weights[i][j];
+			//gc_firing[i_in] = floor(gc_firing[i_in]); // carlsim model only reports whole number gc firing
+			new_firing = ((mex_hat * g->w_scale) * gc_firing[j]);
+			//new_firing = mex_hat * g->w_scale;
+			new_firing_group[i] = new_firing_group[i] + new_firing;
+			//printf("((%f * %f) * %f) tot:%f\n",mex_hat,g->w_scale,gc_firing[i_in],new_firing_group[i_gc]);
+			//printf("%f\n",saved_weights[0][0]);
+			if (i_gc == 31) {
+				//printf("%f|",new_firing);
+			}
 		}
-	}
+	}	
 	//print_firing(new_firing_group, g->t, g);
 	for (int i = 0; i < g->layer_size; i++) {
 		if (g->gc_to_gc) {
 			new_firing_group[i] = new_firing_group[i] + saved_dir_input[i]*2;
+			//new_firing_group[i] = new_firing_group[i] + 2;
 		}
-		//if (i == 31) {
-		//if (i == (g->layer_size - 1)) {
-			//print_firing(new_firing_group, g->t, g);
-		//}
-		// non zero firing rectifier
-		if (new_firing_group[i] < 0) {new_firing_group[i] = 0;}
-		// apply firing scale
-		//new_firing_group[i] = floor(new_firing_group[i]) * g->f_scale; 
-		new_firing_group[i] = new_firing_group[i] * g->f_scale; 
-		// tau derivative
-		gc_firing[i] = gc_firing[i] + (new_firing_group[i] - gc_firing[i])/g->tau_syn;
+		if (new_firing_group[i] < 0) {new_firing_group[i] = 0;} // non zero firing rectifier
+		new_firing_group[i] = new_firing_group[i] * g->f_scale; // apply firing scale
+		gc_firing[i] = gc_firing[i] + (new_firing_group[i] - gc_firing[i])/g->tau_syn; // tau derivative
 	}
 }
 
