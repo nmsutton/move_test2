@@ -28,16 +28,9 @@ void ext_input(char direction, double *gc_firing, G* g) {
 	/*
 		Apply external input
 	*/	
-	double new_firing, new_weight, weight_sum, pd_fac, mex_hat, new_sig, x_in, y_in, x_gc, y_gc, d;
-	int i_in, i_gc; double pd_facs[g->layer_size]; double new_firing_group[g->layer_size];
-	double inhib_firing[g->layer_size]; double excit_firing = g->ext_input_base; 
-	vector<vector<double>> inhib_weights(g->layer_size, vector<double>(g->layer_size));
+	double in_firing, pd_fac, mex_hat;
+	double pd_facs[g->layer_size]; double new_firing_group[g->layer_size]; 
 	for (int i = 0; i < g->layer_size; i++) {pd_facs[i] = 0.00001; new_firing_group[i] = 0.00001;}
-	for (int i = 0; i < g->layer_size; i++) {
-		for (int j = 0; j < g->layer_size; j++) {
-			inhib_weights[i][j] = 0.00001;
-		}
-	}
 
 	set_pos(g, direction); if (g->print_move) {cout << "\n";}
 
@@ -53,27 +46,12 @@ void ext_input(char direction, double *gc_firing, G* g) {
 
 	for (int i = 0; i < g->layer_size; i++) {
 		for (int j = 0; j < g->layer_size; j++) {
-			//mex_hat = saved_weights[i_in][i_gc];
 			mex_hat = saved_weights[i][j];
-			//gc_firing[i_in] = floor(gc_firing[i_in]); // carlsim model only reports whole number gc firing
-			new_firing = ((mex_hat * g->w_scale) * gc_firing[j]);
-			//new_firing = mex_hat * g->w_scale;
-			new_firing_group[i] = new_firing_group[i] + new_firing;
-			//printf("((%f * %f) * %f) tot:%f\n",mex_hat,g->w_scale,gc_firing[i_in],new_firing_group[i_gc]);
-			//printf("%f\n",saved_weights[0][0]);
-			if (i_gc == 31) {
-				//printf("%f|",new_firing);
-			}
+			in_firing = mex_hat * (floor(gc_firing[j])*g->in_scale); // carlsim model only reports whole number gc firing
+			new_firing_group[i] = new_firing_group[i] + in_firing;
 		}
-	}	
-	//print_firing(new_firing_group, g->t, g);
-	for (int i = 0; i < g->layer_size; i++) {
-		if (g->gc_to_gc) {
-			new_firing_group[i] = new_firing_group[i] + saved_dir_input[i]*2;
-			//new_firing_group[i] = new_firing_group[i] + 2;
-		}
+		new_firing_group[i] = new_firing_group[i] + ext_dir_firing[i]*g->ext_scale; // dir_ext input
 		if (new_firing_group[i] < 0) {new_firing_group[i] = 0;} // non zero firing rectifier
-		new_firing_group[i] = new_firing_group[i] * g->f_scale; // apply firing scale
 		gc_firing[i] = gc_firing[i] + (new_firing_group[i] - gc_firing[i])/g->tau_syn; // tau derivative
 	}
 }

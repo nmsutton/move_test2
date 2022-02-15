@@ -58,8 +58,8 @@ struct G {
 	double s_5_syn = 1.0;
 	double a_syn = 4.4; // add f2 f3
 	double syn_scale = 5.0; // max spiking scale
-  	double w_scale = 0.1;//0.5/syn_scale;
-  	double f_scale = 15.0;//syn_scale*3;
+  	double in_scale = 2.0; // interneuron firing scale factor
+  	double ext_scale = 13.0; // ext_dir firing scale factor
 
 	// initial values
 	double y_inter_init = 0.4;//y_inter_syn; // y intercept
