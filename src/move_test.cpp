@@ -61,8 +61,8 @@ void ext_input(char direction, double *gc_firing, G* g) {
 						i_gc = (y_gc * g->layer_x) + x_gc;
 						//if (d < g->dist_thresh) { 
 						//if (d < g->dist_thresh && i_in == 31) { 
-							mex_hat = saved_weights[i_in][i_gc];
-							//mex_hat = saved_weights[i_gc][i_in];
+							//mex_hat = saved_weights[i_in][i_gc];
+							mex_hat = saved_weights[i_gc][i_in];
 							//gc_firing[i_in] = floor(gc_firing[i_in]); // carlsim model only reports whole number gc firing
 							new_firing = ((mex_hat * g->w_scale) * gc_firing[i_in]);
 							//new_firing = mex_hat * g->w_scale;
